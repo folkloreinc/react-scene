@@ -58,6 +58,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var ReactScene = __webpack_require__(1);
 	ReactScene.createScene = __webpack_require__(3);
+	ReactScene.withScene = __webpack_require__(5);
 	
 	module.exports = ReactScene;
 
@@ -275,7 +276,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var methodArgs = [obj].concat(_.map(args, function (arg) {
 	                return arg;
 	            }));
-	            this.props[methodName].apply(null, methodArgs);
+	            var methodReturn = this.props[methodName].apply(null, methodArgs);
+	            if (methodReturn && methodReturn.then) {
+	                var promiseDone = obj.async();
+	                methodReturn.then(promiseDone);
+	            }
 	        }
 	
 	        //If the call is not async, it's done
@@ -446,6 +451,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return targetComponent;
 	};
 
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
+	var ReactScene = __webpack_require__(1);
+	var hoistStatics = __webpack_require__(4);
+	
+	function getDisplayName(WrappedComponent) {
+	    return WrappedComponent.displayName || WrappedComponent.name || 'Component';
+	}
+	
+	module.exports = function (WrappedComponent) {
+	    var WithScene = React.createClass({
+	        displayName: 'WithScene',
+	
+	
+	        contextTypes: {
+	            scene: React.PropTypes.object
+	        },
+	
+	        render: function render() {
+	            return React.createElement(WrappedComponent, _extends({}, this.props, { scene: this.context.scene }));
+	        }
+	
+	    });
+	
+	    WithScene.displayName = 'withScene(' + getDisplayName(WrappedComponent) + ')';
+	    WithScene.WrappedComponent = WrappedComponent;
+	
+	    return hoistStatics(WithScene, WrappedComponent);
+	};
 
 /***/ }
 /******/ ])
