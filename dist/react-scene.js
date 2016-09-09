@@ -170,7 +170,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	
 	        if (this.props.loadOnMount) {
-	            this.load();
+	            var load = this.load;
+	            setTimeout(function () {
+	                load();
+	            }, 1);
 	        }
 	    },
 	
@@ -343,7 +346,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return WrappedComponent.displayName || WrappedComponent.name || 'Component';
 	}
 	
-	module.exports = function (WrappedComponent, props) {
+	module.exports = function (WrappedComponent, props, opts) {
+	    if (typeof opts === 'undefined') {
+	        opts = {};
+	    }
+	    if (!opts.methods) {
+	        opts.methods = ['load', 'build', 'resize', 'mute', 'unmute', 'play', 'pause', 'end', 'destroy'];
+	    }
+	
 	    var SceneWithContext = React.createClass({
 	        displayName: 'SceneWithContext',
 	
@@ -367,14 +377,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	
 	        render: function render() {
-	            var methods = ['load', 'build', 'resize', 'mute', 'unmute', 'play', 'pause', 'end', 'destroy'];
 	            var methodProps = {};
 	            var method;
-	            for (var i = 0, ml = methods.length; i < ml; i++) {
-	                method = methods[i];
-	                if (this.refs.component && this.refs.component[method]) {
-	                    methodProps[method] = this.refs.component[method];
-	                }
+	            for (var i = 0, ml = opts.methods.length; i < ml; i++) {
+	                method = opts.methods[i];
+	                methodProps[method] = this.createRefMethod(method, 'component');
+	                this[method] = this.createRefMethod(method, 'scene');
 	            }
 	
 	            return React.createElement(
@@ -390,40 +398,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            );
 	        },
 	
-	        load: function load() {
-	            this.refs.scene.load();
-	        },
-	
-	        build: function build() {
-	            this.refs.scene.build();
-	        },
-	
-	        resize: function resize() {
-	            this.refs.scene.resize();
-	        },
-	
-	        mute: function mute() {
-	            this.refs.scene.mute();
-	        },
-	
-	        unmute: function unmute() {
-	            this.refs.scene.unmute();
-	        },
-	
-	        play: function play() {
-	            this.refs.scene.play();
-	        },
-	
-	        pause: function pause() {
-	            this.refs.scene.pause();
-	        },
-	
-	        end: function end() {
-	            this.refs.scene.end();
-	        },
-	
-	        destroy: function destroy() {
-	            this.refs.scene.destroy();
+	        createRefMethod: function createRefMethod(method, ref) {
+	            return function () {
+	                if (this.refs[ref] && this.refs[ref][method]) {
+	                    this.refs[ref][method].apply(null, arguments);
+	                } else {
+	                    console.warn('Method "' + method + '" not implemented on component ' + getDisplayName(WrappedComponent));
+	                }
+	            }.bind(this);
 	        }
 	
 	    });
