@@ -119,10 +119,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	        scene: React.PropTypes.object
 	    },
 	
+	    contextTypes: {
+	        scene: React.PropTypes.object
+	    },
+	
 	    getChildContext: function getChildContext() {
 	        return {
 	            scene: {
-	                parent: this
+	                parent: this,
+	                load: this.load,
+	                build: this.build,
+	                resize: this.resize,
+	                mute: this.mute,
+	                unmute: this.unmute,
+	                play: this.play,
+	                pause: this.pause,
+	                end: this.end,
+	                destroy: this.destroy
 	            }
 	        };
 	    },
@@ -146,7 +159,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	
 	    render: function render() {
-	
 	        return this.props.children || null;
 	    },
 	
@@ -327,8 +339,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	module.exports = function (WrappedComponent) {
-	    var WithScene = React.createClass({
-	        displayName: 'WithScene',
+	    var SceneWithContext = React.createClass({
+	        displayName: 'SceneWithContext',
+	
+	
+	        contextTypes: {
+	            scene: React.PropTypes.object
+	        },
+	
+	        render: function render() {
+	            var children = React.cloneElement(this.props.children, {
+	                scene: this.context.scene
+	            });
+	
+	            return children;
+	        }
+	
+	    });
+	
+	    var SceneWrapper = React.createClass({
+	        displayName: 'SceneWrapper',
 	
 	
 	        render: function render() {
@@ -345,16 +375,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return React.createElement(
 	                ReactScene,
 	                _extends({}, this.props, methodProps),
-	                React.createElement(WrappedComponent, _extends({ ref: 'scene' }, this.props))
+	                React.createElement(
+	                    SceneWithContext,
+	                    null,
+	                    React.createElement(WrappedComponent, _extends({ ref: 'scene' }, this.props))
+	                )
 	            );
 	        }
 	
 	    });
 	
-	    WithScene.displayName = 'scene(' + getDisplayName(WrappedComponent) + ')';
-	    WithScene.WrappedComponent = WrappedComponent;
+	    SceneWrapper.displayName = 'scene(' + getDisplayName(WrappedComponent) + ')';
+	    SceneWrapper.WrappedComponent = WrappedComponent;
 	
-	    return hoistStatics(WithScene, WrappedComponent);
+	    return hoistStatics(SceneWrapper, WrappedComponent);
 	};
 
 /***/ },
