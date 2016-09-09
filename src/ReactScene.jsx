@@ -235,7 +235,12 @@ var ReactScene = React.createClass({
             {
                 return arg;
             }));
-            this.props[methodName].apply(null, methodArgs);
+            var methodReturn = this.props[methodName].apply(null, methodArgs);
+            if(methodReturn && methodReturn.then)
+            {
+                var promiseDone = obj.async();
+                methodReturn.then(promiseDone);
+            }
         }
         
         //If the call is not async, it's done
