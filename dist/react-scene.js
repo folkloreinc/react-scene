@@ -372,18 +372,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var method;
 	            for (var i = 0, ml = methods.length; i < ml; i++) {
 	                method = methods[i];
-	                if (this.refs.scene && this.refs.scene[method]) {
-	                    methodProps[method] = this.refs.scene[method];
+	                if (this.refs.component && this.refs.component[method]) {
+	                    methodProps[method] = this.refs.component[method];
 	                }
+	
+	                this[method] = this.refs.scene && this.refs.scene[method] ? this.refs.scene[method] : function () {};
 	            }
 	
 	            return React.createElement(
 	                ReactScene,
-	                _extends({}, this.props, props, methodProps),
+	                _extends({
+	                    ref: 'scene'
+	                }, this.props, props, methodProps),
 	                React.createElement(
 	                    SceneWithContext,
 	                    null,
-	                    React.createElement(WrappedComponent, _extends({ ref: 'scene' }, this.props))
+	                    React.createElement(WrappedComponent, _extends({ ref: 'component' }, this.props))
 	                )
 	            );
 	        }
