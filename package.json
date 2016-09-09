@@ -33,7 +33,8 @@
     "webpack": "npm run webpack:dist && npm run webpack:min",
     "scripts:dist": "npm run webpack",
     "scripts": "npm run scripts:dist",
-    "build:js": "npm run jshint && npm run scripts"
+    "build:js": "npm run jshint && npm run scripts",
+    "release": "build/release.sh"
   },
   "dependencies": {
     "react": "^15.3.1",
