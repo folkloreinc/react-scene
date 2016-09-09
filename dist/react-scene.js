@@ -127,7 +127,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    getChildContext: function getChildContext() {
 	        return {
 	            scene: {
-	                parent: this,
+	                parent: this.context.scene || null,
 	                load: this.load,
 	                build: this.build,
 	                resize: this.resize,
@@ -343,7 +343,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return WrappedComponent.displayName || WrappedComponent.name || 'Component';
 	}
 	
-	module.exports = function (WrappedComponent) {
+	module.exports = function (WrappedComponent, props) {
 	    var SceneWithContext = React.createClass({
 	        displayName: 'SceneWithContext',
 	
@@ -379,7 +379,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	            return React.createElement(
 	                ReactScene,
-	                _extends({}, this.props, methodProps),
+	                _extends({}, this.props, props, methodProps),
 	                React.createElement(
 	                    SceneWithContext,
 	                    null,
