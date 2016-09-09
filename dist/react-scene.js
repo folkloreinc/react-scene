@@ -375,8 +375,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (this.refs.component && this.refs.component[method]) {
 	                    methodProps[method] = this.refs.component[method];
 	                }
-	
-	                this[method] = this.refs.scene && this.refs.scene[method] ? this.refs.scene[method] : function () {};
 	            }
 	
 	            return React.createElement(
@@ -390,6 +388,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    React.createElement(WrappedComponent, _extends({ ref: 'component' }, this.props))
 	                )
 	            );
+	        },
+	
+	        load: function load() {
+	            this.refs.scene.load();
+	        },
+	
+	        build: function build() {
+	            this.refs.scene.build();
+	        },
+	
+	        resize: function resize() {
+	            this.refs.scene.resize();
+	        },
+	
+	        mute: function mute() {
+	            this.refs.scene.mute();
+	        },
+	
+	        unmute: function unmute() {
+	            this.refs.scene.unmute();
+	        },
+	
+	        play: function play() {
+	            this.refs.scene.play();
+	        },
+	
+	        pause: function pause() {
+	            this.refs.scene.pause();
+	        },
+	
+	        end: function end() {
+	            this.refs.scene.end();
+	        },
+	
+	        destroy: function destroy() {
+	            this.refs.scene.destroy();
 	        }
 	
 	    });
