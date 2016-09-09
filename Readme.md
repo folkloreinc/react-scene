@@ -11,7 +11,7 @@ npm install --save react-scene
 React Scene is a component that expose different methods to handle a typic scene logic.
 
 The methods are:
-- `load` Load everything the as to be loaded
+- `load` Load everything that has to be loaded
 - `build` Build the scene (if you need to create or rend any object)
 - `resize` Resize the scene. It is also automatically called when the `width` or `height` props change on the scene
 - `mute` To mute the scene
