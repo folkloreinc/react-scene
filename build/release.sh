@@ -18,7 +18,7 @@ git checkout -b $RELEASE_BRANCH develop
 npm run build
 git add .
 git commit -am "Build $NEXT_VERSION"
-npm version ${VERSION/v/}
+npm --no-git-tag-version version ${VERSION/v/}
 git commit -am "Bump to $NEXT_VERSION"
 git push origin $RELEASE_BRANCH
 
