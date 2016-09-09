@@ -39,8 +39,6 @@ module.exports = function(WrappedComponent, props)
                 {
                     methodProps[method] = this.refs.component[method];
                 }
-                
-                this[method] = this.refs.scene && this.refs.scene[method] ? this.refs.scene[method]:function(){};
             }
             
             return (
@@ -55,6 +53,51 @@ module.exports = function(WrappedComponent, props)
                     </SceneWithContext>
                 </ReactScene>
             );
+        },
+        
+        load: function()
+        {
+            this.refs.scene.load();
+        },
+        
+        build: function()
+        {
+            this.refs.scene.build();
+        },
+        
+        resize: function()
+        {
+            this.refs.scene.resize();
+        },
+        
+        mute: function()
+        {
+            this.refs.scene.mute();
+        },
+        
+        unmute: function()
+        {
+            this.refs.scene.unmute();
+        },
+        
+        play: function()
+        {
+            this.refs.scene.play();
+        },
+        
+        pause: function()
+        {
+            this.refs.scene.pause();
+        },
+        
+        end: function()
+        {
+            this.refs.scene.end();
+        },
+        
+        destroy: function()
+        {
+            this.refs.scene.destroy();
         }
         
     });
