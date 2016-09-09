@@ -23,8 +23,12 @@ var Example = React.createClass({
                 </div>
                 <Scene
                     onRemote={this.onRemote}
+                    sceneWillLoad={this.onSceneWillLoad}
+                    sceneDidLoad={this.onSceneDidLoad}
                     sceneWillPlay={this.onSceneWillPlay}
                     sceneDidPlay={this.onSceneDidPlay}
+                    sceneWillEnd={this.onSceneWillEnd}
+                    sceneDidEnd={this.onSceneDidEnd}
                     />
             </div>
         );
@@ -34,6 +38,20 @@ var Example = React.createClass({
     {
         this.setState({
             remote: remote
+        });
+    },
+    
+    onSceneWillLoad: function()
+    {
+        this.setState({
+            status: 'Will load'
+        });
+    },
+    
+    onSceneDidLoad: function()
+    {
+        this.setState({
+            status: 'Did load'
         });
     },
     
@@ -48,6 +66,20 @@ var Example = React.createClass({
     {
         this.setState({
             status: 'Did play'
+        });
+    },
+    
+    onSceneWillEnd: function()
+    {
+        this.setState({
+            status: 'Will end'
+        });
+    },
+    
+    onSceneDidEnd: function()
+    {
+        this.setState({
+            status: 'Did end'
         });
     },
     

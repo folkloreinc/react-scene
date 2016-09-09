@@ -13,24 +13,20 @@ var Scene = React.createClass({
     render: function()
     {
         return (
-            <ReactScene
-                {...this.props}
-                load={this.load}
-                build={this.build}
-                resize={this.resize}
-                play={this.play}
-                pause={this.pause}
-                end={this.end}
-                destroy={this.destroy}
-            >
+            <div>
                 
-            </ReactScene>
+            </div>
         );
     },
     
     load: function(e)
     {
+        var done = e.async();
         
+        setTimeout(function()
+        {
+            done();
+        }, 2000);
     },
     
     build: function(e)
@@ -51,6 +47,11 @@ var Scene = React.createClass({
         {
             done();
         }, 2000);
+        
+        setTimeout(_.bind(function()
+        {
+            this.refs.scene.end();
+        }, this), 4000);
     },
     
     pause: function(e)
@@ -69,4 +70,4 @@ var Scene = React.createClass({
     }
 });
 
-module.exports = Scene;
+module.exports = ReactScene.createScene(Scene);

@@ -1,5 +1,4 @@
 var React = require('react');
-var changeCase = require('change-case');
 
 var ReactScene = React.createClass({
     
@@ -8,11 +7,16 @@ var ReactScene = React.createClass({
         width: React.PropTypes.number,
         height: React.PropTypes.number,
         
-        buildOnMount: React.PropTypes.bool,
+        loadOnMount: React.PropTypes.bool,
+        buildOnLoad: React.PropTypes.bool,
+        playOnBuild: React.PropTypes.bool,
+        destroyOnUnmount: React.PropTypes.bool,
         
         load: React.PropTypes.func,
         build: React.PropTypes.func,
         resize: React.PropTypes.func,
+        mute: React.PropTypes.func,
+        unmute: React.PropTypes.func,
         play: React.PropTypes.func,
         pause: React.PropTypes.func,
         end: React.PropTypes.func,
@@ -27,6 +31,10 @@ var ReactScene = React.createClass({
         sceneDidBuild: React.PropTypes.func,
         sceneWillResize: React.PropTypes.func,
         sceneDidResize: React.PropTypes.func,
+        sceneWillMute: React.PropTypes.func,
+        sceneDidMute: React.PropTypes.func,
+        sceneWillUnmute: React.PropTypes.func,
+        sceneDidUnmute: React.PropTypes.func,
         sceneWillPlay: React.PropTypes.func,
         sceneDidPlay: React.PropTypes.func,
         sceneWillPause: React.PropTypes.func,
@@ -36,18 +44,42 @@ var ReactScene = React.createClass({
         
     },
     
+    childContextTypes: {
+        scene: React.PropTypes.object
+    },
+    
+    getChildContext: function()
+    {
+        return {
+            scene: {
+                parent: this
+            }
+        };
+    },
+    
     getDefaultProps: function()
     {
         return {
             width: 0,
             height: 0,
             
-            buildOnMount: true
+            loadOnMount: true,
+            buildOnLoad: false,
+            playOnBuild: false,
+            destroyOnUnmount: true
+        };
+    },
+    
+    getInitialState: function()
+    {
+        return {
+            calling: null
         };
     },
     
     render: function()
-    {    
+    {
+        
         return this.props.children || null;
     },
     
@@ -59,9 +91,17 @@ var ReactScene = React.createClass({
             this.props.onRemote(remote);
         }
         
-        if(this.props.buildOnMount)
+        if(this.props.loadOnMount)
         {
-            this.build();
+            this.load();
+        }
+    },
+    
+    componentWillUnmount: function()
+    {
+        if(this.props.destroyOnUnmount)
+        {
+            this.destroy();
         }
     },
     
@@ -83,52 +123,82 @@ var ReactScene = React.createClass({
     
     load: function()
     {
-        this.callSceneMethod('load');
+        this.callSceneMethod('load', arguments);
     },
     
     build: function()
     {
-        this.callSceneMethod('build');
+        this.callSceneMethod('build', arguments);
     },
     
     resize: function()
     {
-        this.callSceneMethod('resize');
+        this.callSceneMethod('resize', arguments);
+    },
+    
+    mute: function()
+    {
+        this.callSceneMethod('mute', arguments);
+    },
+    
+    unmute: function()
+    {
+        this.callSceneMethod('unmute', arguments);
     },
     
     play: function()
     {
-        this.callSceneMethod('play');
+        this.callSceneMethod('play', arguments);
     },
     
     pause: function()
     {
-        this.callSceneMethod('pause');
+        this.callSceneMethod('pause', arguments);
     },
     
     end: function()
     {
-        this.callSceneMethod('end');
+        this.callSceneMethod('end', arguments);
     },
     
     destroy: function()
     {
-        this.callSceneMethod('destroy');
+        this.callSceneMethod('destroy', arguments);
     },
     
-    callSceneMethod: function(name)
+    callSceneMethod: function(name, args)
     {
-        var pascalName = changeCase.pascal(name);
+        if(this.state.calling === name)
+        {
+            return;
+        }
+        
+        this.setState({
+            calling: name
+        });
+        
+        var pascalName = name.substr(0, 1).toUpperCase()+name.substr(1);
         var methodName = name;
         var willLoadName = 'sceneWill'+pascalName;
         var didLoadName = 'sceneDid'+pascalName;
         
         var done = _.bind(function()
         {
+            this.setState({
+                calling: null
+            });
+            
+            //Call the "did" lifecycle method
             if(this.props[didLoadName])
             {
                 this.props[didLoadName]();
             }
+            
+            if(this[didLoadName])
+            {
+                this[didLoadName]();
+            }
+            
         }, this);
         
         var isAsync = false;
@@ -140,16 +210,23 @@ var ReactScene = React.createClass({
             }
         };
         
+        //Calling "will" lifecycle method
         if(this.props[willLoadName])
         {
             this.props[willLoadName]();
         }
         
+        //Calling method
         if(this.props[methodName])
         {
-            this.props[methodName](obj);
+            var methodArgs = [obj].concat(_.map(args, function(arg)
+            {
+                return arg;
+            }));
+            this.props[methodName].apply(null, methodArgs);
         }
         
+        //If the call is not async, it's done
         if(!isAsync)
         {
             done();
@@ -162,11 +239,32 @@ var ReactScene = React.createClass({
             load: this.load,
             build: this.build,
             resize: this.resize,
+            mute: this.mute,
+            unmute: this.unmute,
             play: this.play,
             pause: this.pause,
             end: this.end,
             destroy: this.destroy
         };
+    },
+    
+    /**
+     * Scene lifecycle
+     */
+    sceneDidLoad: function()
+    {
+        if(this.props.buildOnLoad)
+        {
+            this.build();
+        }
+    },
+    
+    sceneDidBuild: function()
+    {
+        if(this.props.playOnBuild)
+        {
+            this.play();
+        }
     }
     
 });

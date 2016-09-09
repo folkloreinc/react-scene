@@ -33,6 +33,7 @@ module.exports = _.extend({}, webpackConfig, {
     
     externals: {
         'react': 'React',
+        'react-dom': 'ReactDOM',
         'jquery': 'jQuery',
         'lodash': '_'
     }
