@@ -6,8 +6,17 @@ function getDisplayName(WrappedComponent)
     return WrappedComponent.displayName || WrappedComponent.name || 'Component';
 }
 
-module.exports = function(WrappedComponent, props)
+module.exports = function(WrappedComponent, props, opts)
 {
+    if(typeof(opts) === 'undefined')
+    {
+        opts = {};
+    }
+    if(!opts.methods)
+    {
+        opts.methods = ['load', 'build', 'resize', 'mute', 'unmute', 'play', 'pause', 'end', 'destroy'];
+    }
+    
     var SceneWithContext = React.createClass({
         
         contextTypes: {
@@ -29,16 +38,13 @@ module.exports = function(WrappedComponent, props)
         
         render: function()
         {
-            var methods = ['load', 'build', 'resize', 'mute', 'unmute', 'play', 'pause', 'end', 'destroy'];
             var methodProps = {};
             var method;
-            for(var i = 0, ml = methods.length; i < ml; i++)
+            for(var i = 0, ml = opts.methods.length; i < ml; i++)
             {
-                method = methods[i];
-                if(this.refs.component && this.refs.component[method])
-                {
-                    methodProps[method] = this.refs.component[method];
-                }
+                method = opts.methods[i];
+                methodProps[method] = this.createRefMethod(method, 'component');
+                this[method] = this.createRefMethod(method, 'scene');
             }
             
             return (
@@ -55,49 +61,19 @@ module.exports = function(WrappedComponent, props)
             );
         },
         
-        load: function()
+        createRefMethod: function(method, ref)
         {
-            this.refs.scene.load();
-        },
-        
-        build: function()
-        {
-            this.refs.scene.build();
-        },
-        
-        resize: function()
-        {
-            this.refs.scene.resize();
-        },
-        
-        mute: function()
-        {
-            this.refs.scene.mute();
-        },
-        
-        unmute: function()
-        {
-            this.refs.scene.unmute();
-        },
-        
-        play: function()
-        {
-            this.refs.scene.play();
-        },
-        
-        pause: function()
-        {
-            this.refs.scene.pause();
-        },
-        
-        end: function()
-        {
-            this.refs.scene.end();
-        },
-        
-        destroy: function()
-        {
-            this.refs.scene.destroy();
+            return function()
+            {
+                if(this.refs[ref] && this.refs[ref][method])
+                {
+                    this.refs[ref][method].apply(null, arguments);
+                }
+                else
+                {
+                    console.warn('Method "'+method+'" not implemented on component '+getDisplayName(WrappedComponent));
+                }
+            }.bind(this);
         }
         
     });

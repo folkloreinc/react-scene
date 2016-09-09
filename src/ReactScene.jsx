@@ -105,7 +105,11 @@ var ReactScene = React.createClass({
         
         if(this.props.loadOnMount)
         {
-            this.load();
+            var load = this.load;
+            setTimeout(function()
+            {
+                load();
+            }, 1);
         }
     },
     
