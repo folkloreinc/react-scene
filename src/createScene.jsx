@@ -35,20 +35,23 @@ module.exports = function(WrappedComponent, props)
             for(var i = 0, ml = methods.length; i < ml; i++)
             {
                 method = methods[i];
-                if(this.refs.scene && this.refs.scene[method])
+                if(this.refs.component && this.refs.component[method])
                 {
-                    methodProps[method] = this.refs.scene[method];
+                    methodProps[method] = this.refs.component[method];
                 }
+                
+                this[method] = this.refs.scene && this.refs.scene[method] ? this.refs.scene[method]:function(){};
             }
             
             return (
                 <ReactScene
+                    ref="scene"
                     {...this.props}
                     {...props}
                     {...methodProps}
                     >
                     <SceneWithContext>
-                        <WrappedComponent ref="scene" {...this.props} />
+                        <WrappedComponent ref="component" {...this.props} />
                     </SceneWithContext>
                 </ReactScene>
             );

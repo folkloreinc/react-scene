@@ -14,7 +14,6 @@ var Example = React.createClass({
     
     render: function()
     {
-        
         return (
             <div>
                 <div>
@@ -22,6 +21,7 @@ var Example = React.createClass({
                     <span>{this.state.status}</span>
                 </div>
                 <Scene
+                    ref="scene"
                     onRemote={this.onRemote}
                     sceneWillLoad={this.onSceneWillLoad}
                     sceneDidLoad={this.onSceneDidLoad}
@@ -32,6 +32,11 @@ var Example = React.createClass({
                     />
             </div>
         );
+    },
+    
+    componentDidMount: function()
+    {
+        console.log(this.refs.scene);
     },
     
     onRemote: function(remote)
@@ -87,10 +92,7 @@ var Example = React.createClass({
     {
         e.preventDefault();
         
-        if(this.state.remote)
-        {
-            this.state.remote.play();
-        }
+        this.refs.scene.play();
     }
 });
 
