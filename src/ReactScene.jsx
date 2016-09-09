@@ -56,7 +56,7 @@ var ReactScene = React.createClass({
     {
         return {
             scene: {
-                parent: this,
+                parent: this.context.scene || null,
                 load: this.load,
                 build: this.build,
                 resize: this.resize,

@@ -86,7 +86,15 @@ var Scene = React.createClass({
     
     play: function(e)
     {
-        
+        var that = this;
+        setTimeout(function()
+        {
+            // If you need to control a scene within a scene. There is a scene
+            // props containing the scene methods. Calling the `end` when the
+            // playback is done is a good example.
+            
+            that.props.scene.end();
+        }, 2000);
     },
     
     pause: function(e)
@@ -106,6 +114,9 @@ var Scene = React.createClass({
     
 });
 
+// Calling createScene with the Component as the first argument, will wrap
+// your scene component in a ReactScene Component and assure that the methods
+// you define will be called and the corresponding lifecycle methods.
 module.exports = ReactScene.createScene(Scene);
 
 ```

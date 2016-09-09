@@ -6,7 +6,7 @@ function getDisplayName(WrappedComponent)
     return WrappedComponent.displayName || WrappedComponent.name || 'Component';
 }
 
-module.exports = function(WrappedComponent)
+module.exports = function(WrappedComponent, props)
 {
     var SceneWithContext = React.createClass({
         
@@ -44,6 +44,7 @@ module.exports = function(WrappedComponent)
             return (
                 <ReactScene
                     {...this.props}
+                    {...props}
                     {...methodProps}
                     >
                     <SceneWithContext>
