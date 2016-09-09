@@ -48,11 +48,24 @@ var ReactScene = React.createClass({
         scene: React.PropTypes.object
     },
     
+    contextTypes: {
+        scene: React.PropTypes.object
+    },
+    
     getChildContext: function()
     {
         return {
             scene: {
-                parent: this
+                parent: this,
+                load: this.load,
+                build: this.build,
+                resize: this.resize,
+                mute: this.mute,
+                unmute: this.unmute,
+                play: this.play,
+                pause: this.pause,
+                end: this.end,
+                destroy: this.destroy
             }
         };
     },
@@ -79,7 +92,6 @@ var ReactScene = React.createClass({
     
     render: function()
     {
-        
         return this.props.children || null;
     },
     

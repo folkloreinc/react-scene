@@ -8,7 +8,24 @@ function getDisplayName(WrappedComponent)
 
 module.exports = function(WrappedComponent)
 {
-    var WithScene = React.createClass({
+    var SceneWithContext = React.createClass({
+        
+        contextTypes: {
+            scene: React.PropTypes.object
+        },
+        
+        render: function()
+        {
+            var children = React.cloneElement(this.props.children, {
+                scene: this.context.scene
+            });
+            
+            return children;
+        }
+        
+    });
+    
+    var SceneWrapper = React.createClass({
         
         render: function()
         {
@@ -29,15 +46,17 @@ module.exports = function(WrappedComponent)
                     {...this.props}
                     {...methodProps}
                     >
-                    <WrappedComponent ref="scene" {...this.props} />
+                    <SceneWithContext>
+                        <WrappedComponent ref="scene" {...this.props} />
+                    </SceneWithContext>
                 </ReactScene>
             );
         }
         
     });
     
-    WithScene.displayName = `scene(${getDisplayName(WrappedComponent)})`;
-    WithScene.WrappedComponent = WrappedComponent;
+    SceneWrapper.displayName = `scene(${getDisplayName(WrappedComponent)})`;
+    SceneWrapper.WrappedComponent = WrappedComponent;
     
-    return hoistStatics(WithScene, WrappedComponent);
+    return hoistStatics(SceneWrapper, WrappedComponent);
 };

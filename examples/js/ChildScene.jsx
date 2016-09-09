@@ -1,9 +1,7 @@
 var React = require('react');
 var ReactScene = require('../../src/index');
 
-var ChildScene = require('./ChildScene');
-
-var Scene = React.createClass({
+var ChildScene = React.createClass({
     
     getInitialState: function()
     {
@@ -16,8 +14,7 @@ var Scene = React.createClass({
     {
         return (
             <div>
-                <h1>Scene</h1>
-                <ChildScene />
+                <h1>Enfant Scene</h1>
             </div>
         );
     },
@@ -73,4 +70,4 @@ var Scene = React.createClass({
     }
 });
 
-module.exports = ReactScene.createScene(Scene);
+module.exports = ReactScene.createScene(ChildScene);
