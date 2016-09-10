@@ -1,4 +1,5 @@
-var ReactScene = require('./ReactScene');
+var React = require('react');
+var createReactScene = require('./createReactScene');
 var hoistStatics = require('hoist-non-react-statics');
 
 function getDisplayName(WrappedComponent)
@@ -6,64 +7,61 @@ function getDisplayName(WrappedComponent)
     return WrappedComponent.displayName || WrappedComponent.name || 'Component';
 }
 
-module.exports = function(WrappedComponent, props, opts)
+module.exports = function(SceneComponent, props, METHODS)
 {
-    if(typeof(opts) === 'undefined')
+    if(typeof(METHODS) === 'undefined')
     {
-        opts = {};
-    }
-    if(!opts.methods)
-    {
-        opts.methods = ['load', 'build', 'resize', 'mute', 'unmute', 'play', 'pause', 'end', 'destroy'];
+        METHODS = createReactScene.DEFAULT_METHODS;
     }
     
-    var SceneWithContext = React.createClass({
-        
-        contextTypes: {
-            scene: React.PropTypes.object
-        },
-        
-        render: function()
-        {
-            var children = React.cloneElement(this.props.children, {
-                scene: this.context.scene
-            });
-            
-            return children;
-        }
-        
-    });
+    var ReactScene = createReactScene(METHODS);
     
-    var SceneWrapper = React.createClass({
+    //Passes context as props
+    var SceneWithContext = function(props, context)
+    {
+        var children = React.cloneElement(props.children, {
+            scene: context.scene
+        });
+        
+        return children;
+    };
+    
+    SceneWithContext.contextTypes = {
+        scene: React.PropTypes.object
+    };
+    
+    //Scene wrapper
+    var screenWrapper = {
         
         render: function()
         {
             var methodProps = {};
             var method;
-            for(var i = 0, ml = opts.methods.length; i < ml; i++)
+            for(var i = 0, ml = METHODS.length; i < ml; i++)
             {
-                method = opts.methods[i];
-                methodProps[method] = this.createRefMethod(method, 'component');
-                this[method] = this.createRefMethod(method, 'scene');
+                method = METHODS[i];
+                methodProps[method] = this.createRefMethod('component', method);
             }
             
+            /* jshint ignore:start */
             return (
                 <ReactScene
                     ref="scene"
-                    {...this.props}
                     {...props}
+                    {...this.props}
                     {...methodProps}
                     >
                     <SceneWithContext>
-                        <WrappedComponent ref="component" {...this.props} />
+                        <SceneComponent ref="component" {...this.props} />
                     </SceneWithContext>
                 </ReactScene>
             );
+            /* jshint ignore:end */
         },
         
-        createRefMethod: function(method, ref)
+        createRefMethod: function(ref, method)
         {
-            return function()
+            var refMethod = function()
             {
                 if(this.refs[ref] && this.refs[ref][method])
                 {
@@ -71,15 +69,31 @@ module.exports = function(WrappedComponent, props, opts)
                 }
                 else
                 {
-                    console.warn('Method "'+method+'" not implemented on component '+getDisplayName(WrappedComponent));
+                    console.warn('Method "'+method+'" not implemented on component '+getDisplayName(SceneComponent));
                 }
-            }.bind(this);
+            };
+            
+            if(this)
+            {
+                refMethod = refMethod.bind(this);
+            }
+            
+            return refMethod;
         }
         
-    });
+    };
     
-    SceneWrapper.displayName = `scene(${getDisplayName(WrappedComponent)})`;
-    SceneWrapper.WrappedComponent = WrappedComponent;
+    //Add methods to wrapper
+    var method;
+    for(var i = 0, ml = METHODS.length; i < ml; i++)
+    {
+        method = METHODS[i];
+        screenWrapper[method] = screenWrapper.createRefMethod.call(null, 'scene', method);
+    }
     
-    return hoistStatics(SceneWrapper, WrappedComponent);
+    var SceneWrapper = React.createClass(screenWrapper);
+    SceneWrapper.displayName = `scene(${getDisplayName(SceneComponent)})`;
+    SceneWrapper.SceneComponent = SceneComponent;
+    
+    return hoistStatics(SceneWrapper, SceneComponent);
 };

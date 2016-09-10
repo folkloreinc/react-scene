@@ -36,7 +36,7 @@ var Example = React.createClass({
     
     componentDidMount: function()
     {
-        console.log(this.refs.scene);
+        
     },
     
     onRemote: function(remote)

@@ -16,9 +16,11 @@ module.exports = function(WrappedComponent)
         
         render: function()
         {
+            /* jshint ignore:start */
             return (
                 <WrappedComponent {...this.props} scene={this.context.scene} />
             );
+            /* jshint ignore:end */
         }
         
     });
