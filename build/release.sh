@@ -20,7 +20,6 @@ git add .
 git commit -am "Build $NEXT_VERSION"
 npm --no-git-tag-version version ${VERSION/v/}
 git commit -am "Bump to $NEXT_VERSION"
-git push origin $RELEASE_BRANCH
 
 # Merge release branch in master
 git checkout master
