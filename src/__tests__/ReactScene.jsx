@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import sinon from 'sinon';
-import { pascal } from 'change-case';
+import pascal from 'pascal-case';
 
 import createReactScene from '../createReactScene';
 import ReactScene from '../ReactScene';

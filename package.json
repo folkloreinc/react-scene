@@ -53,8 +53,8 @@
     "release": "build/release.sh"
   },
   "dependencies": {
-    "change-case": "^3.0.1",
-    "hoist-non-react-statics": "^1.2.0"
+    "hoist-non-react-statics": "^1.2.0",
+    "pascal-case": "^2.0.0"
   },
   "peerDependencies": {
     "react": "^15.0.0"

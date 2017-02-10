@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { pascal } from 'change-case';
+import pascal from 'pascal-case';
 
 const DEFAULT_METHODS = [
     'load',
