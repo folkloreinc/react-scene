@@ -587,12 +587,12 @@ exports.default = function (ChildComponent, sceneProps, argMethods) {
             _this.scene = null;
 
             methods.forEach(function (method) {
-                _this[method] = createRefMethod('scene', method);
+                _this[method] = createRefMethod('scene', method).bind(_this);
             });
 
             _this.methodProps = {};
             methods.forEach(function (method) {
-                _this.methodProps[method] = createRefMethod('component', method);
+                _this.methodProps[method] = createRefMethod('component', method).bind(_this);
             });
             return _this;
         }
@@ -629,11 +629,7 @@ exports.default = function (ChildComponent, sceneProps, argMethods) {
     SceneWrapper.ChildComponent = ChildComponent;
     SceneWrapper.SceneComponent = SceneComponent;
 
-    var HoistedComponent = (0, _hoistNonReactStatics2.default)(SceneWrapper, SceneComponent);
-    if (HoistedComponent.propTypes && HoistedComponent.propTypes.scene) {
-        delete HoistedComponent.propTypes.scene;
-    }
-    return HoistedComponent;
+    return (0, _hoistNonReactStatics2.default)(SceneWrapper, SceneComponent);
 };
 
 /***/ }),
