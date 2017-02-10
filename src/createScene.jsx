@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import hoistStatics from 'hoist-non-react-statics';
 import createReactScene from './createReactScene';
-import withScene from './withScene';
+import SceneWithContext from './SceneWithContext';
 
 const getDisplayName = WrappedComponent => (
     WrappedComponent.displayName || WrappedComponent.name || 'Component'
@@ -10,7 +10,7 @@ const getDisplayName = WrappedComponent => (
 export default (ChildComponent, sceneProps, argMethods) => {
     const methods = argMethods || createReactScene.DEFAULT_METHODS;
 
-    const SceneComponent = withScene(ChildComponent);
+    const SceneComponent = ChildComponent;
     const ReactScene = createReactScene(methods);
 
     function createRefMethod(ref, method) {
@@ -49,10 +49,12 @@ export default (ChildComponent, sceneProps, argMethods) => {
                     {...this.props}
                     {...this.methodProps}
                 >
-                    <SceneComponent
-                        ref={(component) => { this.component = component; }}
-                        {...this.props}
-                    />
+                    <SceneWithContext>
+                        <SceneComponent
+                            ref={(component) => { this.component = component; }}
+                            {...this.props}
+                        />
+                    </SceneWithContext>
                 </ReactScene>
             );
         }

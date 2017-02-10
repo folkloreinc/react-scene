@@ -1,20 +1,18 @@
 import React from 'react';
 import hoistStatics from 'hoist-non-react-statics';
+import SceneWithContext from './SceneWithContext';
 
 const getDisplayName = WrappedComponent => (
     WrappedComponent.displayName || WrappedComponent.name || 'Component'
 );
 
 export default (WrappedComponent) => {
-    const contextTypes = {
-        scene: React.PropTypes.object,
-    };
-
-    const WithScene = (props, context) => (
-        <WrappedComponent {...props} scene={context.scene} />
+    const WithScene = props => (
+        <SceneWithContext>
+            <WrappedComponent {...props} />
+        </SceneWithContext>
     );
 
-    WithScene.contextTypes = contextTypes;
     WithScene.displayName = `withScene(${getDisplayName(WrappedComponent)})`;
     WithScene.WrappedComponent = WrappedComponent;
 
