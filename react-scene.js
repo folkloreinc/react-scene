@@ -629,7 +629,11 @@ exports.default = function (ChildComponent, sceneProps, argMethods) {
     SceneWrapper.ChildComponent = ChildComponent;
     SceneWrapper.SceneComponent = SceneComponent;
 
-    return (0, _hoistNonReactStatics2.default)(SceneWrapper, SceneComponent);
+    var HoistedComponent = (0, _hoistNonReactStatics2.default)(SceneWrapper, SceneComponent);
+    if (HoistedComponent.propTypes && HoistedComponent.propTypes.scene) {
+        delete HoistedComponent.propTypes.scene;
+    }
+    return HoistedComponent;
 };
 
 /***/ }),
