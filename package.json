@@ -1,6 +1,6 @@
 {
   "name": "react-scene",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A component that expose different methods to handle a typic scene logic and their lifecycle.",
   "tags": [
     "react",
