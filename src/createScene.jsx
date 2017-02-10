@@ -32,12 +32,12 @@ export default (ChildComponent, sceneProps, argMethods) => {
             this.scene = null;
 
             methods.forEach((method) => {
-                this[method] = createRefMethod('scene', method);
+                this[method] = createRefMethod('scene', method).bind(this);
             });
 
             this.methodProps = {};
             methods.forEach((method) => {
-                this.methodProps[method] = createRefMethod('component', method);
+                this.methodProps[method] = createRefMethod('component', method).bind(this);
             });
         }
 
@@ -64,9 +64,5 @@ export default (ChildComponent, sceneProps, argMethods) => {
     SceneWrapper.ChildComponent = ChildComponent;
     SceneWrapper.SceneComponent = SceneComponent;
 
-    const HoistedComponent = hoistStatics(SceneWrapper, SceneComponent);
-    if (HoistedComponent.propTypes && HoistedComponent.propTypes.scene) {
-        delete HoistedComponent.propTypes.scene;
-    }
-    return HoistedComponent;
+    return hoistStatics(SceneWrapper, SceneComponent);
 };
