@@ -64,5 +64,9 @@ export default (ChildComponent, sceneProps, argMethods) => {
     SceneWrapper.ChildComponent = ChildComponent;
     SceneWrapper.SceneComponent = SceneComponent;
 
-    return hoistStatics(SceneWrapper, SceneComponent);
+    const HoistedComponent = hoistStatics(SceneWrapper, SceneComponent);
+    if (HoistedComponent.propTypes && HoistedComponent.propTypes.scene) {
+        delete HoistedComponent.propTypes.scene;
+    }
+    return HoistedComponent;
 };
