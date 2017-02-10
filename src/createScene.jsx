@@ -1,99 +1,66 @@
-var React = require('react');
-var createReactScene = require('./createReactScene');
-var hoistStatics = require('hoist-non-react-statics');
+import React, { Component } from 'react';
+import hoistStatics from 'hoist-non-react-statics';
+import createReactScene from './createReactScene';
+import withScene from './withScene';
 
-function getDisplayName(WrappedComponent)
-{
-    return WrappedComponent.displayName || WrappedComponent.name || 'Component';
-}
+const getDisplayName = WrappedComponent => (
+    WrappedComponent.displayName || WrappedComponent.name || 'Component'
+);
 
-module.exports = function(SceneComponent, props, METHODS)
-{
-    if(typeof(METHODS) === 'undefined')
-    {
-        METHODS = createReactScene.DEFAULT_METHODS;
-    }
-    
-    var ReactScene = createReactScene(METHODS);
-    
-    //Passes context as props
-    var SceneWithContext = function(props, context)
-    {
-        var children = React.cloneElement(props.children, {
-            scene: context.scene
-        });
-        
-        return children;
-    };
-    
-    SceneWithContext.contextTypes = {
-        scene: React.PropTypes.object
-    };
-    
-    //Scene wrapper
-    var screenWrapper = {
-        
-        render: function()
-        {
-            var methodProps = {};
-            var method;
-            for(var i = 0, ml = METHODS.length; i < ml; i++)
-            {
-                method = METHODS[i];
-                methodProps[method] = this.createRefMethod('component', method);
+export default (ChildComponent, sceneProps, argMethods) => {
+    const methods = argMethods || createReactScene.DEFAULT_METHODS;
+
+    const SceneComponent = withScene(ChildComponent);
+    const ReactScene = createReactScene(methods);
+
+    function createRefMethod(ref, method) {
+        return function refMethod(...args) {
+            if (this[ref] && this[ref][method]) {
+                this[ref][method].apply(null, args);
+            } else {
+                console.warn(`Method "${method}" not implemented on component ${getDisplayName(SceneComponent)}`);
             }
-            
-            /* jshint ignore:start */
+        };
+    }
+
+    class SceneWrapper extends Component {
+
+        constructor(props) {
+            super(props);
+
+            this.component = null;
+            this.scene = null;
+
+            methods.forEach((method) => {
+                this[method] = createRefMethod('scene', method).bind(this);
+            });
+
+            this.methodProps = {};
+            methods.forEach((method) => {
+                this.methodProps[method] = createRefMethod('component', method).bind(this);
+            });
+        }
+
+        render() {
             return (
                 <ReactScene
-                    ref="scene"
-                    {...props}
+                    ref={(scene) => { this.scene = scene; }}
+                    {...sceneProps}
                     {...this.props}
-                    {...methodProps}
-                    >
-                    <SceneWithContext>
-                        <SceneComponent ref="component" {...this.props} />
-                    </SceneWithContext>
+                    {...this.methodProps}
+                >
+                    <SceneComponent
+                        ref={(component) => { this.component = component; }}
+                        {...this.props}
+                    />
                 </ReactScene>
             );
-            /* jshint ignore:end */
-        },
-        
-        createRefMethod: function(ref, method)
-        {
-            var refMethod = function()
-            {
-                if(this.refs[ref] && this.refs[ref][method])
-                {
-                    this.refs[ref][method].apply(null, arguments);
-                }
-                else
-                {
-                    console.warn('Method "'+method+'" not implemented on component '+getDisplayName(SceneComponent));
-                }
-            };
-            
-            if(this)
-            {
-                refMethod = refMethod.bind(this);
-            }
-            
-            return refMethod;
         }
-        
-    };
-    
-    //Add methods to wrapper
-    var method;
-    for(var i = 0, ml = METHODS.length; i < ml; i++)
-    {
-        method = METHODS[i];
-        screenWrapper[method] = screenWrapper.createRefMethod.call(null, 'scene', method);
     }
-    
-    var SceneWrapper = React.createClass(screenWrapper);
+
     SceneWrapper.displayName = `scene(${getDisplayName(SceneComponent)})`;
+    SceneWrapper.ChildComponent = ChildComponent;
     SceneWrapper.SceneComponent = SceneComponent;
-    
+
     return hoistStatics(SceneWrapper, SceneComponent);
 };

@@ -1,6 +1,13 @@
-var ReactScene = require('./ReactScene');
-ReactScene.createReactScene = require('./createReactScene');
-ReactScene.createScene = require('./createScene');
-ReactScene.withScene = require('./withScene');
+import ReactScene from './ReactScene';
+import createReactScene from './createReactScene';
+import createScene from './createScene';
+import withScene from './withScene';
 
-module.exports = ReactScene;
+export {
+    ReactScene,
+    createReactScene,
+    createScene,
+    withScene,
+};
+
+export default ReactScene;

@@ -1,19 +1,17 @@
 module.exports = {
-    
+
     /**
      * Browsersync
      */
     browsersync: {
         server: {
             baseDir: ['./.tmp','./examples'],
-            index: 'index.html'
+            index: 'index.html',
         },
-        
-        
-        
-        files: ['examples/**']
+
+        files: ['examples/**'],
     },
-    
+
     /**
      * Webpack middleware
      */
@@ -26,60 +24,60 @@ module.exports = {
 
         watchOptions: {
             aggregateTimeout: 300,
-            poll: true
+            poll: true,
         },
-        
+
         stats: {
-            colors: true
-        }
+            colors: true,
+        },
     },
-    
+
     /**
      * PostCSS
      */
     postcss: {
         autoprefixer: {
-            browsers: '> 5%'
-        }
+            browsers: '> 5%',
+        },
     },
-    
+
     /**
      * Modernizr
      */
     modernizr: {
-        'cache' : true,
+        cache: true,
 
-        'devFile' : false,
+        devFile: false,
 
-        'dest' : '.tmp/modernizr.js',
+        dest: '.tmp/modernizr.js',
 
-        'options' : [
+        options: [
             'setClasses',
             'addTest',
             'html5printshiv',
             'testProp',
-            'fnBind'
+            'fnBind',
         ],
 
-        'uglify' : false,
+        uglify: false,
 
-        'tests' : [],
+        tests: [],
 
-        'excludeTests': [],
+        excludeTests: [],
 
-        'crawl' : true,
+        crawl: true,
 
-        'useBuffers' : false,
+        useBuffers: false,
 
-        'files' : {
-            'src': [
+        files: {
+            src: [
                 '*[^(g|G)runt(file)?].{js,css,scss}',
                 '**[^node_modules]/**/*.{js,css,scss}',
-                '!lib/**/*'
-            ]
+                '!lib/**/*',
+            ],
         },
 
-        'customTests' : []
+        customTests: [],
     }
-    
+
 };

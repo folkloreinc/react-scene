@@ -1,6 +1,7 @@
-var React = require('react');
+import React, { Component } from 'react';
+import { pascal } from 'change-case';
 
-var DEFAULT_METHODS = [
+const DEFAULT_METHODS = [
     'load',
     'build',
     'resize',
@@ -9,279 +10,210 @@ var DEFAULT_METHODS = [
     'play',
     'pause',
     'end',
-    'destroy'
+    'destroy',
 ];
 
-function createReactScene(METHODS)
-{
-    if(typeof(METHODS) === 'undefined')
-    {
-        METHODS = DEFAULT_METHODS;
+const createReactScene = (argMethods) => {
+    const methods = argMethods || DEFAULT_METHODS;
+
+    const propTypes = {
+
+        width: React.PropTypes.number,
+        height: React.PropTypes.number,
+
+        loadOnMount: React.PropTypes.bool,
+        buildOnLoad: React.PropTypes.bool,
+        playOnBuild: React.PropTypes.bool,
+        destroyOnUnmount: React.PropTypes.bool,
+
+        children: React.PropTypes.element,
+    };
+
+    const contextTypes = {
+        scene: React.PropTypes.object,
+    };
+
+    const childContextTypes = {
+        scene: React.PropTypes.object,
+    };
+
+    const defaultProps = {
+        width: 0,
+        height: 0,
+
+        loadOnMount: true,
+        buildOnLoad: false,
+        playOnBuild: false,
+        destroyOnUnmount: true,
+
+        children: null,
+    };
+
+    function createSceneMethod(method) {
+        return function sceneMethod(...args) {
+            return this.callSceneMethod(method, args);
+        };
     }
-    
-    var reactScene = {
-        
-        propTypes: {
-            
-            width: React.PropTypes.number,
-            height: React.PropTypes.number,
-            
-            // loadOnMount: React.PropTypes.bool,
-            // buildOnLoad: React.PropTypes.bool,
-            // playOnBuild: React.PropTypes.bool,
-            
-            onRemote: React.PropTypes.func
-            
-        },
-        
-        childContextTypes: {
-            scene: React.PropTypes.object
-        },
-        
-        contextTypes: {
-            scene: React.PropTypes.object
-        },
-        
-        getChildContext: function()
-        {
-            var scene = {
-                parent: this.context.scene || null
+
+    class ReactScene extends Component {
+
+        constructor(props) {
+            super(props);
+
+            const self = this;
+            methods.forEach((method) => {
+                self[method] = createSceneMethod(method).bind(self);
+            });
+
+            this.state = {
+                calling: null,
             };
-            
-            var method;
-            for(var i = 0, ml = METHODS.length; i < ml; i++)
-            {
-                method = METHODS[i];
+        }
+
+        getChildContext() {
+            const scene = {
+                parent: this.context.scene || null,
+            };
+
+            methods.forEach((method) => {
                 scene[method] = this[method];
-            }
-            
+            });
+
             return {
-                scene: scene
+                scene,
             };
-        },
-        
-        getDefaultProps: function()
-        {
-            return {
-                width: 0,
-                height: 0,
-                
-                loadOnMount: true,
-                buildOnLoad: false,
-                playOnBuild: false,
-                destroyOnUnmount: true
-            };
-        },
-        
-        getInitialState: function()
-        {
-            return {
-                calling: null
-            };
-        },
-        
-        render: function()
-        {
-            return this.props.children || null;
-        },
-        
-        componentDidMount: function()
-        {
-            if(this.props.onRemote)
-            {
-                var remote = this.createRemote();
-                this.props.onRemote(remote);
-            }
-            
-            if(this.load && this.props.loadOnMount)
-            {
-                var load = this.load;
-                setTimeout(function()
-                {
-                    load();
+        }
+
+        componentDidMount() {
+            if (this.load && this.props.loadOnMount) {
+                setTimeout(() => {
+                    this.load();
                 }, 1);
             }
-        },
-        
-        componentWillUnmount: function()
-        {
-            if(this.destroy && this.props.destroyOnUnmount)
-            {
-                this.destroy();
-            }
-        },
-        
-        componentDidUpdate: function(prevProps, prevState)
-        {
-            var onRemoteChanged = prevProps.onRemote !== this.props.onRemote;
-            if(onRemoteChanged && this.props.onRemote)
-            {
-                var remote = this.createRemote();
-                this.props.onRemote(remote);
-            }
-            
-            if(this.resize)
-            {
-                var sizeChanged = prevProps.width !== this.props.width || prevProps.height !== this.props.height;
-                if(sizeChanged)
-                {
+        }
+
+        componentDidUpdate(prevProps) {
+            if (this.resize) {
+                const sizeChanged = (
+                    prevProps.width !== this.props.width ||
+                    prevProps.height !== this.props.height
+                );
+                if (sizeChanged) {
                     this.resize();
                 }
             }
-        },
-        
-        callSceneMethod: function(name, args)
-        {
-            if(this.state.calling === name)
-            {
+        }
+
+        componentWillUnmount() {
+            if (this.destroy && this.props.destroyOnUnmount) {
+                this.destroy();
+            }
+        }
+
+        callSceneMethod(name, args) {
+            if (this.state.calling === name) {
                 return;
             }
-            
+
             this.setState({
-                calling: name
+                calling: name,
             });
-            
-            var pascalName = name.substr(0, 1).toUpperCase()+name.substr(1);
-            var methodName = name;
-            var willLoadName = 'sceneWill'+pascalName;
-            var didLoadName = 'sceneDid'+pascalName;
-            
-            var done = function()
-            {
+
+            const methodName = name;
+            const pascalName = pascal(name);
+            const willLoadName = `sceneWill${pascalName}`;
+            const didLoadName = `sceneDid${pascalName}`;
+
+            const done = () => {
                 this.setState({
-                    calling: null
+                    calling: null,
                 });
-                
-                //Call the "did" lifecycle method
-                if(this.props[didLoadName])
-                {
+
+                // Call the "did" lifecycle method
+                if (this.props[didLoadName]) {
                     this.props[didLoadName]();
                 }
-                
-                if(this[didLoadName])
-                {
+
+                if (this[didLoadName]) {
                     this[didLoadName]();
                 }
-                
-            }.bind(this);
-            
-            var isAsync = false;
-            var obj = {
-                async: function()
-                {
+            };
+
+            let isAsync = false;
+            const obj = {
+                async() {
                     isAsync = true;
                     return done;
-                }
+                },
             };
-            
-            //Calling "will" lifecycle method
-            if(this.props[willLoadName])
-            {
+
+            // Calling "will" lifecycle method
+            if (this.props[willLoadName]) {
                 this.props[willLoadName]();
             }
-            
-            //Calling method
-            if(this.props[methodName])
-            {
-                var methodArgs = [obj].concat(args);
-                var methodReturn = this.props[methodName].apply(null, methodArgs);
-                if(methodReturn && methodReturn.then)
-                {
-                    var promiseDone = obj.async();
+
+            // Calling method
+            if (this.props[methodName]) {
+                const methodArgs = [obj].concat(args);
+                const methodReturn = this.props[methodName].apply(null, methodArgs);
+                if (methodReturn && methodReturn.then) {
+                    const promiseDone = obj.async();
                     methodReturn.then(promiseDone);
                 }
             }
-            
-            //If the call is not async, it's done
-            if(!isAsync)
-            {
+
+            // If the call is not async, it's done
+            if (!isAsync) {
                 done();
             }
-        },
-        
-        createRemote: function()
-        {
-            var remote = {};
-            var method;
-            for(var i = 0, ml = METHODS.length; i < ml; i++)
-            {
-                method = METHODS[i];
-                remote[method] = this[method];
-            }
-            
-            return remote;
-        },
-        
+        }
+
         /**
          * Scene lifecycle
          */
-        sceneDidLoad: function()
-        {
-            if(this.build && this.props.buildOnLoad)
-            {
+        sceneDidLoad() {
+            if (this.build && this.props.buildOnLoad) {
                 this.build();
             }
-        },
-        
-        sceneDidBuild: function()
-        {
-            if(this.play && this.props.playOnBuild)
-            {
+        }
+
+        sceneDidBuild() {
+            if (this.play && this.props.playOnBuild) {
                 this.play();
             }
         }
-        
-    };
-    
-    function createSceneMethod(method)
-    {
-        return function()
-        {
-            var args = [];
-            for(var i = 0, al = arguments.length; i < al; i++)
-            {
-                args.push(arguments[i]);
-            }
-            this.callSceneMethod(method, args);
-        };
+
+        render() {
+            return this.props.children || null;
+        }
     }
-    
-    var method, methodPascal;
-    for(var i = 0, ml = METHODS.length; i < ml; i++)
-    {
-        method = METHODS[i];
-        methodPascal = method.replace(/(\w)(\w*)/g, function(g0,g1,g2)
-        {
-            return g1.toUpperCase() + g2.toLowerCase();
-        });
-        
-        //PropTypes
-        reactScene.propTypes[method] = React.PropTypes.func;
-        reactScene.propTypes['sceneWill'+methodPascal] = React.PropTypes.func;
-        reactScene.propTypes['sceneDid'+methodPascal] = React.PropTypes.func;
-        if(method === 'destroy')
-        {
-            reactScene.propTypes.destroyOnUnmount = React.PropTypes.bool;
+
+    methods.forEach((method) => {
+        const methodPascal = pascal(method);
+
+        // PropTypes
+        propTypes[method] = React.PropTypes.func;
+        propTypes[`sceneWill${methodPascal}`] = React.PropTypes.func;
+        propTypes[`sceneDid${methodPascal}`] = React.PropTypes.func;
+        if (method === 'destroy') {
+            propTypes.destroyOnUnmount = React.PropTypes.bool;
+        } else if (method === 'build') {
+            propTypes.buildOnLoad = React.PropTypes.bool;
+        } else if (method === 'load') {
+            propTypes.loadOnMount = React.PropTypes.bool;
         }
-        else if(method === 'build')
-        {
-            reactScene.propTypes.buildOnLoad = React.PropTypes.bool;
-        }
-        else if(method === 'load')
-        {
-            reactScene.propTypes.loadOnMount = React.PropTypes.bool;
-        }
-        
-        // Methods
-        reactScene[method] = createSceneMethod(method);
-    }
-    
-    var ReactScene = React.createClass(reactScene);
+    });
+
+    ReactScene.propTypes = propTypes;
+    ReactScene.contextTypes = contextTypes;
+    ReactScene.childContextTypes = childContextTypes;
+    ReactScene.defaultProps = defaultProps;
+
     ReactScene.displayName = 'ReactScene';
-    
+
     return ReactScene;
-}
+};
 
 createReactScene.DEFAULT_METHODS = DEFAULT_METHODS;
 
-module.exports = createReactScene;
+export default createReactScene;

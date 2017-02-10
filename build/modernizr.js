@@ -1,20 +1,18 @@
 #!/usr/bin/env node
-
-var program = require('commander');
-var modernizr = require('customizr');
-var settings = require('./config').modernizr;
+const program = require('commander');
+const modernizr = require('customizr');
+const settings = require('./config').modernizr;
 
 program
     .option('-p, --prod', 'Production build')
     .parse(process.argv);
 
-if(program.prod)
-{
+if (program.prod) {
     settings.dest = 'dist/modernizr.js';
     settings.uglify = true;
     settings.cache = false;
 }
 
-modernizr(settings, function () {
-    
+modernizr(settings, () => {
+
 });
