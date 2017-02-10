@@ -16,7 +16,7 @@ export default (ChildComponent, sceneProps, argMethods) => {
     function createRefMethod(ref, method) {
         return function refMethod(...args) {
             if (this[ref] && this[ref][method]) {
-                this[ref][method].apply(null, args);
+                this[ref][method].call(this[ref], ...args);
             } else {
                 console.warn(`Method "${method}" not implemented on component ${getDisplayName(SceneComponent)}`);
             }
@@ -32,12 +32,12 @@ export default (ChildComponent, sceneProps, argMethods) => {
             this.scene = null;
 
             methods.forEach((method) => {
-                this[method] = createRefMethod('scene', method).bind(this);
+                this[method] = createRefMethod('scene', method);
             });
 
             this.methodProps = {};
             methods.forEach((method) => {
-                this.methodProps[method] = createRefMethod('component', method).bind(this);
+                this.methodProps[method] = createRefMethod('component', method);
             });
         }
 
