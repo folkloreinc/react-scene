@@ -188,6 +188,10 @@ const createReactScene = (argMethods) => {
         }
     }
 
+    delete propTypes.destroyOnUnmount;
+    delete propTypes.buildOnLoad;
+    delete propTypes.loadOnMount;
+
     methods.forEach((method) => {
         const methodPascal = pascal(method);
 
